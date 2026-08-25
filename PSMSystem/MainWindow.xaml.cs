@@ -1,24 +1,22 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.EntityFrameworkCore;
+using PSMSystem.Data;
 
 namespace PSMSystem
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+
+
+            var factory = App.Services.GetRequiredService<IDbContextFactory<PsmDbContext>>();
+            using var context = factory.CreateDbContext();
+            var cantidadClientes = context.Clientes.Count();
+            MessageBox.Show($"Conexión OK. Clientes en la base: {cantidadClientes}");
         }
     }
 }
