@@ -32,7 +32,7 @@ public class PsmDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // ---------- Cliente ----------
+        
         modelBuilder.Entity<Cliente>(entity =>
         {
             entity.ToTable("Cliente");
@@ -47,7 +47,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("date");
         });
 
-        // ---------- Vehiculo ----------
+        
         modelBuilder.Entity<Vehiculo>(entity =>
         {
             entity.ToTable("Vehiculo");
@@ -70,7 +70,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // ---------- EstadoTurno ----------
+        
         modelBuilder.Entity<EstadoTurno>(entity =>
         {
             entity.ToTable("EstadoTurno");
@@ -86,7 +86,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-        // ---------- EstadoOrdenTrabajo ----------
+        
         modelBuilder.Entity<EstadoOrdenTrabajo>(entity =>
         {
             entity.ToTable("EstadoOrdenTrabajo");
@@ -95,8 +95,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
 
-            // Inferidos del prototipo (Diagnóstico/Avances/Repuestos/Presupuesto → Finalizada);
-            // no estaban enumerados explícitamente en tu modelo. Avisame si los querés cambiar.
+
             entity.HasData(
                 new EstadoOrdenTrabajo { IdEstadoOrden = 1, Nombre = "Pendiente" },
                 new EstadoOrdenTrabajo { IdEstadoOrden = 2, Nombre = "En proceso" },
@@ -105,7 +104,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-        // ---------- EstadoPresupuesto ----------
+        
         modelBuilder.Entity<EstadoPresupuesto>(entity =>
         {
             entity.ToTable("EstadoPresupuesto");
@@ -114,7 +113,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
 
-            // También inferidos (CU18 no los enumera). Avisame si los querés cambiar.
+            
             entity.HasData(
                 new EstadoPresupuesto { IdEstadoPresupuesto = 1, Nombre = "Pendiente" },
                 new EstadoPresupuesto { IdEstadoPresupuesto = 2, Nombre = "Aprobado" },
@@ -123,7 +122,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-        // ---------- EstadoFactura ----------
+        
         modelBuilder.Entity<EstadoFactura>(entity =>
         {
             entity.ToTable("EstadoFactura");
@@ -132,7 +131,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
 
-            // Estos 3 sí están tal cual en el prototipo de Facturación (Pendiente/Pagada/Vencida).
+            
             entity.HasData(
                 new EstadoFactura { IdEstadoFactura = 1, Nombre = "Pendiente" },
                 new EstadoFactura { IdEstadoFactura = 2, Nombre = "Pagada" },
@@ -140,7 +139,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-        // ---------- TipoMovimientoStock ----------
+        
         modelBuilder.Entity<TipoMovimientoStock>(entity =>
         {
             entity.ToTable("TipoMovimientoStock");
@@ -149,7 +148,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
 
-            // Estos 4 sí están enumerados literalmente en la sección 5 de tu prompt.
+            
             entity.HasData(
                 new TipoMovimientoStock { IdTipoMovimiento = 1, Nombre = "Ingreso" },
                 new TipoMovimientoStock { IdTipoMovimiento = 2, Nombre = "Egreso" },
@@ -158,7 +157,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-        // ---------- Repuesto ----------
+        
         modelBuilder.Entity<Repuesto>(entity =>
         {
             entity.ToTable("Repuesto");
