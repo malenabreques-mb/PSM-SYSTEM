@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSMSystem.Data;
+using PSMSystem.Services;
+using PSMSystem.ViewsModels;
 
 namespace PSMSystem;
 
@@ -28,7 +30,8 @@ public partial class App : Application
         services.AddDbContextFactory<PsmDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-
+        services.AddSingleton<ClienteService>();
+        services.AddTransient<ClientesViewModel>();
 
         Services = services.BuildServiceProvider();
 

@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System.Windows;
-using Microsoft.EntityFrameworkCore;
-using PSMSystem.Data;
+﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using PSMSystem.ViewsModels;
 
 namespace PSMSystem
 {
@@ -12,11 +10,7 @@ namespace PSMSystem
         {
             InitializeComponent();
 
-
-            var factory = App.Services.GetRequiredService<IDbContextFactory<PsmDbContext>>();
-            using var context = factory.CreateDbContext();
-            var cantidadClientes = context.Clientes.Count();
-            MessageBox.Show($"Conexión OK. Clientes en la base: {cantidadClientes}");
+            ClientesViewControl.DataContext = App.Services.GetRequiredService<ClientesViewModel>();
         }
     }
 }
