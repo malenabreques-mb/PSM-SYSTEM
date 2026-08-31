@@ -16,7 +16,7 @@ public class ClienteService
     }
 
     public async Task<ResultadoPagina<Cliente>> BuscarClientesAsync(
-        string? texto, int pagina, int tamanioPagina, CancellationToken ct = default)
+    string? texto, int pagina, int tamanioPagina, CancellationToken ct = default)
     {
         await using var context = await _contextFactory.CreateDbContextAsync(ct);
 
@@ -28,7 +28,8 @@ public class ClienteService
             query = query.Where(c =>
                 EF.Functions.Like(c.Nombre, $"%{filtro}%") ||
                 EF.Functions.Like(c.Apellido, $"%{filtro}%") ||
-                (c.Telefono != null && EF.Functions.Like(c.Telefono, $"%{filtro}%")));
+                (c.Telefono != null && EF.Functions.Like(c.Telefono, $"%{filtro}%")) ||
+                (c.Direccion != null && EF.Functions.Like(c.Direccion, $"%{filtro}%")));
         }
 
         var total = await query.CountAsync(ct);
@@ -41,7 +42,8 @@ public class ClienteService
             .ToListAsync(ct);
 
         return new ResultadoPagina<Cliente>(items, total);
-    }
+    }       
+    
 
     public async Task<Cliente> CrearAsync(Cliente cliente, CancellationToken ct = default)
     {
@@ -138,5 +140,16 @@ public class ClienteService
 
         if (string.IsNullOrWhiteSpace(cliente.Direccion))
             throw new ReglaNegocioException("La dirección es obligatoria.");
+    }
+
+    public async Task<List<Cliente>> ObtenerClientesActivosAsync(CancellationToken ct = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(ct);
+        return await context.Clientes
+            .AsNoTracking()
+            .Where(c => c.Activo)
+            .OrderBy(c => c.Apellido)
+            .ThenBy(c => c.Nombre)
+            .ToListAsync(ct);
     }
 }

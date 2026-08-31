@@ -18,7 +18,7 @@
             <Button DockPanel.Dock="Right" Content="Buscar" Command="{Binding BuscarCommand}" Margin="8,0,0,0"/>
             <TextBox Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"
                      Width="280" HorizontalAlignment="Left"
-                     ToolTip="Filtrar por nombre, apellido o teléfono">
+                     ToolTip="Filtrar por nombre, apellido, teléfono o dirección">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Return" Command="{Binding BuscarCommand}"/>
                 </TextBox.InputBindings>
