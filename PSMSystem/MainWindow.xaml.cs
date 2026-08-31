@@ -16,6 +16,7 @@ namespace PSMSystem
         private void MostrarClientes_Click(object sender, RoutedEventArgs e) => MostrarClientes();
         private void MostrarVehiculos_Click(object sender, RoutedEventArgs e) => MostrarVehiculos();
         private void MostrarTurnos_Click(object sender, RoutedEventArgs e) => MostrarTurnos();
+        private void MostrarOrdenes_Click(object sender, RoutedEventArgs e) => MostrarOrdenes();
 
         private void MostrarClientes()
         {
@@ -38,6 +39,14 @@ namespace PSMSystem
             ContenidoPrincipal.Content = new TurnosView
             {
                 DataContext = App.Services.GetRequiredService<TurnosViewModel>()
+            };
+        }
+
+        private void MostrarOrdenes()
+        {
+            ContenidoPrincipal.Content = new OrdenesTrabajoView
+            {
+                DataContext = App.Services.GetRequiredService<OrdenesTrabajoViewModel>()
             };
         }
     }

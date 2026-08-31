@@ -1,0 +1,69 @@
+<Window x:Class="PSMSystem.Views.OrdenTrabajoEditView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Titulo}"
+        Width="420" Height="640"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16">
+            <TextBlock Text="{Binding Titulo}" FontSize="16" FontWeight="Bold" Margin="0,0,0,12"/>
+
+            <TextBlock Text="Cliente"/>
+            <ComboBox ItemsSource="{Binding ClientesDisponibles}"
+                  DisplayMemberPath="NombreCompleto"
+                  SelectedValuePath="IdCliente"
+                  SelectedValue="{Binding IdClienteSeleccionado}"
+                  IsEnabled="{Binding PuedeCambiarClienteYVehiculo}"
+                  Margin="0,2,0,10"/>
+
+            <TextBlock Text="Vehículo"/>
+            <ComboBox ItemsSource="{Binding VehiculosDisponibles}"
+                  DisplayMemberPath="DescripcionCombo"
+                  SelectedValuePath="IdVehiculo"
+                  SelectedValue="{Binding IdVehiculoSeleccionado}"
+                  IsEnabled="{Binding PuedeCambiarClienteYVehiculo}"
+                  Margin="0,2,0,10"/>
+
+            <TextBlock Text="Turno asociado (opcional)"/>
+            <ComboBox ItemsSource="{Binding TurnosDisponibles}"
+                  DisplayMemberPath="DescripcionCombo"
+                  SelectedValuePath="IdTurno"
+                  SelectedValue="{Binding IdTurnoSeleccionado}"
+                  Margin="0,2,0,10"/>
+
+            <TextBlock Text="Motivo de ingreso"/>
+            <TextBox Text="{Binding MotivoIngreso, UpdateSourceTrigger=PropertyChanged}"
+                 TextWrapping="Wrap" AcceptsReturn="True" Height="50" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Diagnóstico inicial"/>
+            <TextBox Text="{Binding DiagnosticoInicial, UpdateSourceTrigger=PropertyChanged}"
+                 TextWrapping="Wrap" AcceptsReturn="True" Height="60" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Observaciones"/>
+            <TextBox Text="{Binding Observaciones, UpdateSourceTrigger=PropertyChanged}"
+                 TextWrapping="Wrap" AcceptsReturn="True" Height="50" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Fecha de ingreso"/>
+            <DatePicker SelectedDate="{Binding FechaIngreso}" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Fecha estimada de entrega"/>
+            <DatePicker SelectedDate="{Binding FechaEntregaEstimada}" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Estado"/>
+            <ComboBox ItemsSource="{Binding EstadosDisponibles}"
+                  DisplayMemberPath="Nombre"
+                  SelectedValuePath="IdEstadoOrden"
+                  SelectedValue="{Binding IdEstadoSeleccionado}"
+                  IsEnabled="{Binding EsEdicion}"
+                  Margin="0,2,0,10"/>
+
+            <TextBlock Text="{Binding MensajeError}" Foreground="Red" TextWrapping="Wrap" Margin="0,4,0,10"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancelar" Command="{Binding CancelarCommand}" Width="90" Margin="0,0,8,0"/>
+                <Button Content="Guardar" Command="{Binding GuardarCommand}" Width="90"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

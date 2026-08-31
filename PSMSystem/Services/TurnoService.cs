@@ -145,4 +145,15 @@ public class TurnoService
         if (string.IsNullOrWhiteSpace(turno.Motivo))
             throw new ReglaNegocioException("El motivo es obligatorio.");
     }
+
+    public async Task<List<Turno>> ObtenerTurnosPorClienteAsync(int idCliente, CancellationToken ct = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(ct);
+        return await context.Turnos
+            .AsNoTracking()
+            .Where(t => t.IdCliente == idCliente)
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Hora)
+            .ToListAsync(ct);
+    }
 }

@@ -8,6 +8,7 @@
             <MenuItem Header="Clientes" Click="MostrarClientes_Click"/>
             <MenuItem Header="Vehículos" Click="MostrarVehiculos_Click"/>
             <MenuItem Header="Turnos" Click="MostrarTurnos_Click"/>
+            <MenuItem Header="Órdenes de Trabajo" Click="MostrarOrdenes_Click"/>
         </Menu>
         <ContentControl x:Name="ContenidoPrincipal"/>
     </DockPanel>

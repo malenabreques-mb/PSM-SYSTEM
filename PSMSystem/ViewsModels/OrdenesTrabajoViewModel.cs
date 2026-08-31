@@ -8,53 +8,57 @@ using PSMSystem.Views;
 
 namespace PSMSystem.ViewsModels;
 
-public class TurnosViewModel : ViewModelBase
+public class OrdenesTrabajoViewModel : ViewModelBase
 {
     private const int TamanioPagina = 10;
 
-    private readonly TurnoService _turnoService;
+    private readonly OrdenTrabajoService _ordenService;
     private readonly ClienteService _clienteService;
     private readonly VehiculoService _vehiculoService;
+    private readonly TurnoService _turnoService;
 
     private string? _textoBusqueda;
-    private EstadoTurno? _estadoFiltro;
+    private EstadoOrdenTrabajo? _estadoFiltro;
     private DateTime? _fechaFiltro;
     private int _paginaActual = 1;
-    private int _totalTurnos;
+    private int _totalOrdenes;
     private bool _cargando;
 
-    public TurnosViewModel(TurnoService turnoService, ClienteService clienteService, VehiculoService vehiculoService)
+    public OrdenesTrabajoViewModel(
+        OrdenTrabajoService ordenService, ClienteService clienteService,
+        VehiculoService vehiculoService, TurnoService turnoService)
     {
-        _turnoService = turnoService;
+        _ordenService = ordenService;
         _clienteService = clienteService;
         _vehiculoService = vehiculoService;
+        _turnoService = turnoService;
 
-        Turnos = new ObservableCollection<Turno>();
-        EstadosFiltro = new ObservableCollection<EstadoTurno>
+        Ordenes = new ObservableCollection<OrdenTrabajo>();
+        EstadosFiltro = new ObservableCollection<EstadoOrdenTrabajo>
         {
-            new EstadoTurno { IdEstadoTurno = 0, Nombre = "Todos" }
+            new EstadoOrdenTrabajo { IdEstadoOrden = 0, Nombre = "Todos" }
         };
         _estadoFiltro = EstadosFiltro[0];
 
         BuscarCommand = new AsyncRelayCommand(async _ => await CambiarPaginaAsync(1));
-        AgregarTurnoCommand = new RelayCommand(_ => AbrirDialogoTurno(null));
-        EditarTurnoCommand = new RelayCommand(parametro => AbrirDialogoTurno(parametro as Turno));
-        EliminarTurnoCommand = new AsyncRelayCommand(async parametro => await EliminarAsync(parametro as Turno));
+        AgregarOrdenCommand = new RelayCommand(_ => AbrirDialogoOrden(null));
+        EditarOrdenCommand = new RelayCommand(parametro => AbrirDialogoOrden(parametro as OrdenTrabajo));
+        EliminarOrdenCommand = new AsyncRelayCommand(async parametro => await EliminarAsync(parametro as OrdenTrabajo));
         PaginaAnteriorCommand = new AsyncRelayCommand(
             async _ => await CambiarPaginaAsync(_paginaActual - 1), _ => _paginaActual > 1);
         PaginaSiguienteCommand = new AsyncRelayCommand(
             async _ => await CambiarPaginaAsync(_paginaActual + 1), _ => _paginaActual < TotalPaginas);
 
-
         _ = CargarEstadosAsync();
         _ = CambiarPaginaAsync(1);
     }
 
-    public ObservableCollection<Turno> Turnos { get; }
-    public ObservableCollection<EstadoTurno> EstadosFiltro { get; }
+    public ObservableCollection<OrdenTrabajo> Ordenes { get; }
+    public ObservableCollection<EstadoOrdenTrabajo> EstadosFiltro { get; }
 
     public string? TextoBusqueda { get => _textoBusqueda; set => SetProperty(ref _textoBusqueda, value); }
-    public EstadoTurno? EstadoFiltro
+
+    public EstadoOrdenTrabajo? EstadoFiltro
     {
         get => _estadoFiltro;
         set
@@ -75,19 +79,20 @@ public class TurnosViewModel : ViewModelBase
     }
 
     public int PaginaActual { get => _paginaActual; private set => SetProperty(ref _paginaActual, value); }
-    public int TotalPaginas => _totalTurnos == 0 ? 1 : (int)Math.Ceiling(_totalTurnos / (double)TamanioPagina);
+    public int TotalPaginas => _totalOrdenes == 0 ? 1 : (int)Math.Ceiling(_totalOrdenes / (double)TamanioPagina);
     public bool Cargando { get => _cargando; private set => SetProperty(ref _cargando, value); }
+    public bool SinResultados => !Cargando && _totalOrdenes == 0;
 
     public ICommand BuscarCommand { get; }
-    public ICommand AgregarTurnoCommand { get; }
-    public ICommand EditarTurnoCommand { get; }
-    public ICommand EliminarTurnoCommand { get; }
+    public ICommand AgregarOrdenCommand { get; }
+    public ICommand EditarOrdenCommand { get; }
+    public ICommand EliminarOrdenCommand { get; }
     public ICommand PaginaAnteriorCommand { get; }
     public ICommand PaginaSiguienteCommand { get; }
 
     private async Task CargarEstadosAsync()
     {
-        var estados = await _turnoService.ObtenerEstadosAsync();
+        var estados = await _ordenService.ObtenerEstadosAsync();
         foreach (var estado in estados)
             EstadosFiltro.Add(estado);
     }
@@ -97,16 +102,16 @@ public class TurnosViewModel : ViewModelBase
         Cargando = true;
         try
         {
-            var idEstado = EstadoFiltro is { IdEstadoTurno: > 0 } ? EstadoFiltro.IdEstadoTurno : (int?)null;
+            var idEstado = EstadoFiltro is { IdEstadoOrden: > 0 } ? EstadoFiltro.IdEstadoOrden : (int?)null;
             var fecha = FechaFiltro.HasValue ? DateOnly.FromDateTime(FechaFiltro.Value) : (DateOnly?)null;
 
-            var resultado = await _turnoService.BuscarTurnosAsync(TextoBusqueda, idEstado, fecha, pagina, TamanioPagina);
+            var resultado = await _ordenService.BuscarOrdenesAsync(TextoBusqueda, idEstado, fecha, pagina, TamanioPagina);
 
-            Turnos.Clear();
-            foreach (var turno in resultado.Items)
-                Turnos.Add(turno);
+            Ordenes.Clear();
+            foreach (var orden in resultado.Items)
+                Ordenes.Add(orden);
 
-            _totalTurnos = resultado.Total;
+            _totalOrdenes = resultado.Total;
             PaginaActual = pagina;
             OnPropertyChanged(nameof(TotalPaginas));
         }
@@ -117,14 +122,16 @@ public class TurnosViewModel : ViewModelBase
         finally
         {
             Cargando = false;
+            OnPropertyChanged(nameof(SinResultados));
         }
     }
 
-    private void AbrirDialogoTurno(Turno? turnoAEditar)
+    private void AbrirDialogoOrden(OrdenTrabajo? ordenAEditar)
     {
-        var dialogo = new TurnoEditView
+        var dialogo = new OrdenTrabajoEditView
         {
-            DataContext = new TurnoEditViewModel(_turnoService, _clienteService, _vehiculoService, turnoAEditar),
+            DataContext = new OrdenTrabajoEditViewModel(
+                _ordenService, _clienteService, _vehiculoService, _turnoService, ordenAEditar),
             Owner = Application.Current.MainWindow
         };
 
@@ -132,13 +139,12 @@ public class TurnosViewModel : ViewModelBase
             _ = CambiarPaginaAsync(PaginaActual);
     }
 
-    private async Task EliminarAsync(Turno? turno)
+    private async Task EliminarAsync(OrdenTrabajo? orden)
     {
-        if (turno is null) return;
+        if (orden is null) return;
 
         var confirmar = MessageBox.Show(
-            $"¿Seguro que querés eliminar el turno del {turno.Fecha:dd/MM/yyyy} a las {turno.Hora:HH:mm}? " +
-            "Esta acción no se puede deshacer.",
+            $"¿Seguro que querés eliminar la orden #{orden.IdOrdenTrabajo}? Esta acción no se puede deshacer.",
             "Confirmar eliminación",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning);
@@ -147,7 +153,7 @@ public class TurnosViewModel : ViewModelBase
 
         try
         {
-            await _turnoService.EliminarAsync(turno.IdTurno);
+            await _ordenService.EliminarAsync(orden.IdOrdenTrabajo);
             await CambiarPaginaAsync(PaginaActual);
         }
         catch (Exception ex)

@@ -17,4 +17,5 @@ public class Turno
     public Vehiculo? Vehiculo { get; set; }
     public EstadoTurno? EstadoTurno { get; set; }
     public ICollection<OrdenTrabajo> OrdenesTrabajo { get; set; } = new List<OrdenTrabajo>();
+    public string DescripcionCombo => IdTurno == 0 ? Motivo : $"{Fecha:dd/MM/yyyy} {Hora:HH:mm} - {Motivo}";
 }
