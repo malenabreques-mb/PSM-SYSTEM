@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PSMSystem.Data;
 
@@ -11,9 +12,11 @@ using PSMSystem.Data;
 namespace PSMSystem.Migrations
 {
     [DbContext(typeof(PsmDbContext))]
-    partial class PsmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830005000_AgregarHoraATurno")]
+    partial class AgregarHoraATurno
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

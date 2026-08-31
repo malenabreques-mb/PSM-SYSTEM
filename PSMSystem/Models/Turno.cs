@@ -9,6 +9,7 @@ public class Turno
     public int IdVehiculo { get; set; }
     public int IdEstadoTurno { get; set; }
     public DateOnly Fecha { get; set; }
+    public TimeOnly Hora { get; set; }
     public required string Motivo { get; set; }
     public DateOnly? FechaCreacion { get; set; }
 
