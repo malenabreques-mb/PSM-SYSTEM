@@ -31,7 +31,11 @@ public partial class App : Application
             options.UseSqlServer(connectionString));
 
         services.AddSingleton<ClienteService>();
+        services.AddSingleton<VehiculoService>();
+        services.AddSingleton<TurnoService>();
         services.AddTransient<ClientesViewModel>();
+        services.AddTransient<VehiculosViewModel>();
+        services.AddTransient<TurnosViewModel>();
 
         Services = services.BuildServiceProvider();
 
