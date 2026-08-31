@@ -13,6 +13,9 @@ public class Vehiculo
     public DateOnly? FechaCreacion { get; set; }
     public DateOnly? FechaModificacion { get; set; }
 
+    public string ClienteDescripcion => Cliente is null ? "-" : Cliente.NombreCompleto;
+    public string DescripcionCombo => $"{Patente} - {Marca} {Modelo}";
+
     public Cliente? Cliente { get; set; }
     public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
     public ICollection<OrdenTrabajo> OrdenesTrabajo { get; set; } = new List<OrdenTrabajo>();
