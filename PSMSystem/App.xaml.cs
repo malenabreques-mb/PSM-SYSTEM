@@ -34,10 +34,12 @@ public partial class App : Application
         services.AddSingleton<VehiculoService>();
         services.AddSingleton<TurnoService>();
         services.AddSingleton<OrdenTrabajoService>();
+        services.AddSingleton<AvanceTrabajoService>();
         services.AddTransient<ClientesViewModel>();
         services.AddTransient<VehiculosViewModel>();
         services.AddTransient<TurnosViewModel>();
         services.AddTransient<OrdenesTrabajoViewModel>();
+        services.AddTransient<HistorialViewModel>();
 
         Services = services.BuildServiceProvider();
 

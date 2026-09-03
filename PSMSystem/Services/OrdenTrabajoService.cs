@@ -86,7 +86,7 @@ public class OrdenTrabajoService
         var existente = await context.OrdenesTrabajo.FirstOrDefaultAsync(o => o.IdOrdenTrabajo == orden.IdOrdenTrabajo, ct)
             ?? throw new ReglaNegocioException("La orden que intentás editar ya no existe.");
 
-        // CU15: se actualizan estado, diagnóstico y observaciones. Cliente y vehículo no se reasignan.
+        
         existente.IdEstadoOrden = orden.IdEstadoOrden;
         existente.MotivoIngreso = orden.MotivoIngreso;
         existente.DiagnosticoInicial = orden.DiagnosticoInicial;
@@ -149,4 +149,45 @@ public class OrdenTrabajoService
         if (orden.FechaEntregaEstimada is null)
             throw new ReglaNegocioException("La fecha estimada de entrega es obligatoria.");
     }
+    public async Task<ResultadoPagina<OrdenTrabajo>> BuscarHistorialAsync(
+    string? texto, DateOnly? fecha, int pagina, int tamanioPagina, CancellationToken ct = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(ct);
+
+        var query = context.OrdenesTrabajo.AsNoTracking()
+            .Include(o => o.Cliente)
+            .Include(o => o.Vehiculo)
+            .Include(o => o.EstadoOrden)
+            .Where(o => o.EstadoOrden!.Nombre == "Finalizada")
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(texto))
+        {
+            var filtro = texto.Trim();
+            var esNumero = int.TryParse(filtro, out var idBuscado);
+
+            query = query.Where(o =>
+                (esNumero && o.IdOrdenTrabajo == idBuscado) ||
+                EF.Functions.Like(o.Cliente!.Nombre, $"%{filtro}%") ||
+                EF.Functions.Like(o.Cliente!.Apellido, $"%{filtro}%") ||
+                EF.Functions.Like(o.Vehiculo!.Patente, $"%{filtro}%") ||
+                EF.Functions.Like(o.Vehiculo!.Marca, $"%{filtro}%") ||
+                EF.Functions.Like(o.Vehiculo!.Modelo, $"%{filtro}%"));
+        }
+
+        if (fecha.HasValue)
+            query = query.Where(o => o.FechaIngreso == fecha.Value);
+
+        var total = await query.CountAsync(ct);
+
+        var items = await query
+            .OrderByDescending(o => o.FechaIngreso)
+            .ThenByDescending(o => o.IdOrdenTrabajo)
+            .Skip((pagina - 1) * tamanioPagina)
+            .Take(tamanioPagina)
+            .ToListAsync(ct);
+
+        return new ResultadoPagina<OrdenTrabajo>(items, total);
+    }
+
 }
