@@ -1,0 +1,37 @@
+<Window x:Class="PSMSystem.Views.RepuestoEditView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Titulo}"
+        Width="380" Height="480"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <StackPanel Margin="16">
+        <TextBlock Text="{Binding Titulo}" FontSize="16" FontWeight="Bold" Margin="0,0,0,12"/>
+
+        <TextBlock Text="Nombre"/>
+        <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+        <TextBlock Text="Categoría"/>
+        <TextBox Text="{Binding Categoria, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+        <TextBlock Text="Proveedor"/>
+        <TextBox Text="{Binding Proveedor, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+        <TextBlock Text="Precio unitario"/>
+        <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+        <TextBlock Text="Stock mínimo"/>
+        <TextBox Text="{Binding StockMinimo, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+        <TextBlock Text="Stock inicial"/>
+        <TextBox Text="{Binding StockInicial, UpdateSourceTrigger=PropertyChanged}"
+                 IsEnabled="{Binding PuedeEditarStockInicial}" Margin="0,2,0,10"/>
+
+        <TextBlock Text="{Binding MensajeError}" Foreground="Red" TextWrapping="Wrap" Margin="0,4,0,10"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancelar" Command="{Binding CancelarCommand}" Width="90" Margin="0,0,8,0"/>
+            <Button Content="Guardar" Command="{Binding GuardarCommand}" Width="90"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

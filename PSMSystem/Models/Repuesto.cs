@@ -13,6 +13,7 @@ public class Repuesto
     public int? StockMinimo { get; set; }
     public bool? Activo { get; set; }
     public DateOnly? FechaCreacion { get; set; }
+    public bool StockBajo => StockMinimo.HasValue && StockActual < StockMinimo.Value;
 
     public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
     public ICollection<DetallePresupuesto> DetallesPresupuesto { get; set; } = new List<DetallePresupuesto>();

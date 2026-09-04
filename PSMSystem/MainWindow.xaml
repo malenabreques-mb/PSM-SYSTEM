@@ -10,6 +10,7 @@
             <MenuItem Header="Turnos" Click="MostrarTurnos_Click"/>
             <MenuItem Header="Órdenes de Trabajo" Click="MostrarOrdenes_Click"/>
             <MenuItem Header="Historial" Click="MostrarHistorial_Click"/>
+            <MenuItem Header="Repuestos" Click="MostrarRepuestos_Click"/>
         </Menu>
         <ContentControl x:Name="ContenidoPrincipal"/>
     </DockPanel>
