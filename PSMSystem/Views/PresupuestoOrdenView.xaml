@@ -1,0 +1,104 @@
+<Window x:Class="PSMSystem.Views.PresupuestoOrdenView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Presupuesto de la orden"
+        Width="520" Height="640"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock FontSize="16" FontWeight="Bold">
+                <Run Text="Presupuesto — Orden #"/><Run Text="{Binding Orden.IdOrdenTrabajo, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Text="{Binding Orden.Vehiculo.DescripcionCombo}" Foreground="Gray"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Visibility="{Binding ExistePresupuesto, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <TextBlock Text="Esta orden todavía no tiene presupuesto." Margin="0,0,0,8"/>
+            <Button Content="+ Crear presupuesto" Command="{Binding CrearPresupuestoCommand}"
+                    HorizontalAlignment="Left" Padding="10,4"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2" Visibility="{Binding ExistePresupuesto, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+			<DockPanel Grid.Row="0" Margin="0,0,0,8">
+				<TextBlock Text="{Binding EstadoActual}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+				<Button Content="✓ Aprobar" Command="{Binding AprobarCommand}" Padding="8,2" Margin="0,0,6,0"
+                        Visibility="{Binding EstaEnElaboracion, Converter={StaticResource BoolToVisibilityConverter}}"/>
+				<Button Content="✗ Rechazar" Command="{Binding RechazarCommand}" Padding="8,2" Margin="0,0,6,0"
+                        Visibility="{Binding EstaEnElaboracion, Converter={StaticResource BoolToVisibilityConverter}}"/>
+				<Button Content="↺ Volver a elaboración" Command="{Binding VolverAElaboracionCommand}" Padding="8,2"
+                        Visibility="{Binding EstaEnElaboracion, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+			</DockPanel>
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Detalles}" AutoGenerateColumns="False"
+                      IsReadOnly="True" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tipo" Binding="{Binding TipoItem}" Width="90"/>
+                    <DataGridTextColumn Header="Ítem" Binding="{Binding ItemDescripcion}" Width="*"/>
+                    <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="50"/>
+                    <DataGridTextColumn Header="Precio" Binding="{Binding PrecioUnitario, StringFormat={}{0:C2}}" Width="90"/>
+                    <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat={}{0:C2}}" Width="90"/>
+                    <DataGridTemplateColumn Header="" Width="70">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Quitar" Padding="4,2"
+										IsEnabled="{Binding DataContext.PuedeEditarItems, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Command="{Binding DataContext.EliminarItemCommand,
+                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+		<StackPanel Grid.Row="3" Margin="0,12,0,0" Visibility="{Binding PuedeEditarItems, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock Text="Agregar ítem" FontWeight="Bold" Margin="0,0,0,6"/>
+
+            <TextBlock Text="Tipo"/>
+            <ComboBox ItemsSource="{Binding TiposItem}" SelectedItem="{Binding TipoItemSeleccionado}" Margin="0,2,0,10"/>
+
+            <StackPanel Visibility="{Binding EsRepuesto, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="Repuesto"/>
+                <ComboBox ItemsSource="{Binding RepuestosDisponibles}" DisplayMemberPath="DescripcionCombo"
+                          SelectedValuePath="IdRepuesto" SelectedValue="{Binding IdRepuestoSeleccionado}"
+                          Margin="0,2,0,10"/>
+            </StackPanel>
+
+            <StackPanel Visibility="{Binding EsRepuesto, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <TextBlock Text="Descripción del trabajo"/>
+                <TextBox Text="{Binding DescripcionItem, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+            </StackPanel>
+
+            <TextBlock Text="Cantidad"/>
+            <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Precio unitario"/>
+            <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+            <TextBlock Text="{Binding MensajeError}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+            <Button Content="+ Agregar ítem" Command="{Binding AgregarItemCommand}"
+                    HorizontalAlignment="Left" Padding="10,4"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <TextBlock VerticalAlignment="Center" Margin="0,0,16,0" FontWeight="Bold" FontSize="14">
+                <Run Text="Total: "/><Run Text="{Binding Total, StringFormat={}{0:C2}, Mode=OneWay}"/>
+            </TextBlock>
+            <Button Content="Cerrar" Command="{Binding CerrarCommand}" Width="90"/>
+        </StackPanel>
+    </Grid>
+</Window>

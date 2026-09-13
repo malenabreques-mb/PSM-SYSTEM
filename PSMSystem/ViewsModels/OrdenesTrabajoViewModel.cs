@@ -17,6 +17,8 @@ public class OrdenesTrabajoViewModel : ViewModelBase
     private readonly VehiculoService _vehiculoService;
     private readonly TurnoService _turnoService;
     private readonly AvanceTrabajoService _avanceService;
+    private readonly PresupuestoService _presupuestoService;
+    private readonly RepuestoService _repuestoService;
 
     private string? _textoBusqueda;
     private EstadoOrdenTrabajo? _estadoFiltro;
@@ -27,13 +29,15 @@ public class OrdenesTrabajoViewModel : ViewModelBase
 
     public OrdenesTrabajoViewModel(
         OrdenTrabajoService ordenService, ClienteService clienteService,
-        VehiculoService vehiculoService, TurnoService turnoService, AvanceTrabajoService avanceService)
+        VehiculoService vehiculoService, TurnoService turnoService, AvanceTrabajoService avanceService, PresupuestoService presupuestoService, RepuestoService repuestoService)
     {
         _ordenService = ordenService;
         _clienteService = clienteService;
         _vehiculoService = vehiculoService;
         _turnoService = turnoService;
         _avanceService = avanceService;
+        _presupuestoService = presupuestoService;
+        _repuestoService = repuestoService;
 
         Ordenes = new ObservableCollection<OrdenTrabajo>();
         EstadosFiltro = new ObservableCollection<EstadoOrdenTrabajo>
@@ -51,6 +55,7 @@ public class OrdenesTrabajoViewModel : ViewModelBase
             async _ => await CambiarPaginaAsync(_paginaActual - 1), _ => _paginaActual > 1);
         PaginaSiguienteCommand = new AsyncRelayCommand(
             async _ => await CambiarPaginaAsync(_paginaActual + 1), _ => _paginaActual < TotalPaginas);
+        VerPresupuestoCommand = new RelayCommand(parametro => AbrirPresupuesto(parametro as OrdenTrabajo));
 
         _ = CargarEstadosAsync();
         _ = CambiarPaginaAsync(1);
@@ -93,6 +98,7 @@ public class OrdenesTrabajoViewModel : ViewModelBase
     public ICommand PaginaAnteriorCommand { get; }
     public ICommand PaginaSiguienteCommand { get; }
     public ICommand VerAvancesCommand { get; }
+    public ICommand VerPresupuestoCommand { get; }
 
     private async Task CargarEstadosAsync()
     {
@@ -156,6 +162,18 @@ public class OrdenesTrabajoViewModel : ViewModelBase
         dialogo.ShowDialog();
     }
 
+    private void AbrirPresupuesto(OrdenTrabajo? orden)
+    {
+        if (orden is null) return;
+
+        var dialogo = new PresupuestoOrdenView
+        {
+            DataContext = new PresupuestoOrdenViewModel(_presupuestoService, _repuestoService, orden),
+            Owner = Application.Current.MainWindow
+        };
+
+        dialogo.ShowDialog();
+    }
     private async Task EliminarAsync(OrdenTrabajo? orden)
     {
         if (orden is null) return;

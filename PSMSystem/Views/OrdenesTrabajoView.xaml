@@ -43,7 +43,7 @@
                 <DataGridTextColumn Header="Motivo" Binding="{Binding MotivoIngreso}" Width="2*"/>
                 <DataGridTextColumn Header="Entrega est." Binding="{Binding FechaEntregaEstimada, StringFormat=dd/MM/yyyy}" Width="90"/>
                 <DataGridTextColumn Header="Estado" Binding="{Binding EstadoOrden.Nombre}" Width="110"/>
-                <DataGridTemplateColumn Header="Acciones" Width="150">
+				<DataGridTemplateColumn Header="Acciones" Width="280">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -55,6 +55,10 @@
                                         Command="{Binding DataContext.VerAvancesCommand,
                                                   RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"/>
+								<Button Content="Presupuesto" Padding="6,2" Margin="0,0,4,0"
+		                                Command="{Binding DataContext.VerPresupuestoCommand,
+                                                  RelativeSource={RelativeSource AncestorType=DataGrid}}"
+		                                CommandParameter="{Binding}"/>
                                 <Button Content="Eliminar" Padding="6,2"
                                         Command="{Binding DataContext.EliminarOrdenCommand,
                                                   RelativeSource={RelativeSource AncestorType=DataGrid}}"

@@ -118,4 +118,14 @@ public class RepuestoService
         if (repuesto.PrecioUnitario.HasValue && repuesto.PrecioUnitario.Value < 0)
             throw new ReglaNegocioException("El precio no puede ser negativo.");
     }
+
+    public async Task<List<Repuesto>> ObtenerActivosAsync(CancellationToken ct = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(ct);
+        return await context.Repuestos
+            .AsNoTracking()
+            .Where(r => r.Activo == true)
+            .OrderBy(r => r.Nombre)
+            .ToListAsync(ct);
+    }
 }

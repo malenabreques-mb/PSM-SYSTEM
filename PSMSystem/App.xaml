@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:PSMSystem"
              xmlns:helpers="clr-namespace:PSMSystem.Helpers">
 	<Application.Resources>
+		<helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
 		<helpers:BoolToEstadoConverter x:Key="BoolToEstadoConverter"/>
 		<BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 	</Application.Resources>
