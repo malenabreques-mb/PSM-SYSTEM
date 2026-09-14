@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PSMSystem.Models;
 
 namespace PSMSystem.Data;
@@ -32,30 +31,32 @@ public class PsmDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        
+        const string collationSinTildes = "Latin1_General_CI_AI";
+
+        // ---------- Cliente ----------
         modelBuilder.Entity<Cliente>(entity =>
         {
             entity.ToTable("Cliente");
             entity.HasKey(e => e.IdCliente);
             entity.Property(e => e.IdCliente).HasColumnName("id_cliente");
-            entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(100).IsUnicode(false).IsRequired();
-            entity.Property(e => e.Apellido).HasColumnName("apellido").HasMaxLength(100).IsUnicode(false).IsRequired();
+            entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(100).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
+            entity.Property(e => e.Apellido).HasColumnName("apellido").HasMaxLength(100).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
             entity.Property(e => e.Telefono).HasColumnName("telefono").HasMaxLength(30).IsUnicode(false);
-            entity.Property(e => e.Direccion).HasColumnName("direccion").HasMaxLength(200).IsUnicode(false);
+            entity.Property(e => e.Direccion).HasColumnName("direccion").HasMaxLength(200).IsUnicode(false).UseCollation(collationSinTildes);
             entity.Property(e => e.Activo).HasColumnName("activo").IsRequired();
             entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("date");
             entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("date");
         });
 
-        
+        // ---------- Vehiculo ----------
         modelBuilder.Entity<Vehiculo>(entity =>
         {
             entity.ToTable("Vehiculo");
             entity.HasKey(e => e.IdVehiculo);
             entity.Property(e => e.IdVehiculo).HasColumnName("id_vehiculo");
             entity.Property(e => e.IdCliente).HasColumnName("id_cliente");
-            entity.Property(e => e.Marca).HasColumnName("marca").HasMaxLength(100).IsUnicode(false).IsRequired();
-            entity.Property(e => e.Modelo).HasColumnName("modelo").HasMaxLength(100).IsUnicode(false).IsRequired();
+            entity.Property(e => e.Marca).HasColumnName("marca").HasMaxLength(100).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
+            entity.Property(e => e.Modelo).HasColumnName("modelo").HasMaxLength(100).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
             entity.Property(e => e.Anio).HasColumnName("anio");
             entity.Property(e => e.Patente).HasColumnName("patente").HasMaxLength(20).IsUnicode(false).IsRequired();
             entity.Property(e => e.Activo).HasColumnName("activo").IsRequired();
@@ -70,7 +71,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- EstadoTurno ----------
         modelBuilder.Entity<EstadoTurno>(entity =>
         {
             entity.ToTable("EstadoTurno");
@@ -86,7 +87,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-        
+        // ---------- EstadoOrdenTrabajo ----------
         modelBuilder.Entity<EstadoOrdenTrabajo>(entity =>
         {
             entity.ToTable("EstadoOrdenTrabajo");
@@ -94,7 +95,6 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.IdEstadoOrden).HasColumnName("id_estado_orden");
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
-
 
             entity.HasData(
                 new EstadoOrdenTrabajo { IdEstadoOrden = 1, Nombre = "Pendiente" },
@@ -104,7 +104,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-
+        // ---------- EstadoPresupuesto ----------
         modelBuilder.Entity<EstadoPresupuesto>(entity =>
         {
             entity.ToTable("EstadoPresupuesto");
@@ -121,7 +121,7 @@ public class PsmDbContext : DbContext
             );
         });
 
-
+        // ---------- EstadoFactura ----------
         modelBuilder.Entity<EstadoFactura>(entity =>
         {
             entity.ToTable("EstadoFactura");
@@ -130,15 +130,15 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
 
-            
             entity.HasData(
-                new EstadoFactura { IdEstadoFactura = 1, Nombre = "Pendiente" },
+                new EstadoFactura { IdEstadoFactura = 1, Nombre = "Pendiente de emisión" },
                 new EstadoFactura { IdEstadoFactura = 2, Nombre = "Pagada" },
-                new EstadoFactura { IdEstadoFactura = 3, Nombre = "Vencida" }
+                new EstadoFactura { IdEstadoFactura = 3, Nombre = "Vencida" },
+                new EstadoFactura { IdEstadoFactura = 4, Nombre = "Pendiente de pago" }
             );
         });
 
-        
+        // ---------- TipoMovimientoStock ----------
         modelBuilder.Entity<TipoMovimientoStock>(entity =>
         {
             entity.ToTable("TipoMovimientoStock");
@@ -147,7 +147,6 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsUnicode(false).IsRequired();
             entity.HasIndex(e => e.Nombre).IsUnique();
 
-            
             entity.HasData(
                 new TipoMovimientoStock { IdTipoMovimiento = 1, Nombre = "Ingreso" },
                 new TipoMovimientoStock { IdTipoMovimiento = 2, Nombre = "Egreso" },
@@ -156,15 +155,15 @@ public class PsmDbContext : DbContext
             );
         });
 
-        
+        // ---------- Repuesto ----------
         modelBuilder.Entity<Repuesto>(entity =>
         {
             entity.ToTable("Repuesto");
             entity.HasKey(e => e.IdRepuesto);
             entity.Property(e => e.IdRepuesto).HasColumnName("id_repuesto");
-            entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(150).IsUnicode(false).IsRequired();
-            entity.Property(e => e.Categoria).HasColumnName("categoria").HasMaxLength(100).IsUnicode(false);
-            entity.Property(e => e.Proveedor).HasColumnName("proveedor").HasMaxLength(150).IsUnicode(false);
+            entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(150).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
+            entity.Property(e => e.Categoria).HasColumnName("categoria").HasMaxLength(100).IsUnicode(false).UseCollation(collationSinTildes);
+            entity.Property(e => e.Proveedor).HasColumnName("proveedor").HasMaxLength(150).IsUnicode(false).UseCollation(collationSinTildes);
             entity.Property(e => e.PrecioUnitario).HasColumnName("precio_unitario").HasPrecision(18, 2);
             entity.Property(e => e.StockActual).HasColumnName("stock_actual").IsRequired();
             entity.Property(e => e.StockMinimo).HasColumnName("stock_minimo");
@@ -172,7 +171,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("date");
         });
 
-        
+        // ---------- MovimientoStock ----------
         modelBuilder.Entity<MovimientoStock>(entity =>
         {
             entity.ToTable("MovimientoStock");
@@ -195,7 +194,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- Turno ----------
         modelBuilder.Entity<Turno>(entity =>
         {
             entity.ToTable("Turno");
@@ -205,7 +204,8 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.IdVehiculo).HasColumnName("id_vehiculo");
             entity.Property(e => e.IdEstadoTurno).HasColumnName("id_estado_turno");
             entity.Property(e => e.Fecha).HasColumnName("fecha").HasColumnType("date").IsRequired();
-            entity.Property(e => e.Motivo).HasColumnName("motivo").HasMaxLength(300).IsUnicode(false).IsRequired();
+            entity.Property(e => e.Hora).HasColumnName("hora").HasColumnType("time(0)").IsRequired();
+            entity.Property(e => e.Motivo).HasColumnName("motivo").HasMaxLength(300).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
             entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("date");
 
             entity.HasOne(e => e.Cliente)
@@ -224,7 +224,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- OrdenTrabajo ----------
         modelBuilder.Entity<OrdenTrabajo>(entity =>
         {
             entity.ToTable("OrdenTrabajo");
@@ -234,7 +234,7 @@ public class PsmDbContext : DbContext
             entity.Property(e => e.IdVehiculo).HasColumnName("id_vehiculo");
             entity.Property(e => e.IdTurno).HasColumnName("id_turno");
             entity.Property(e => e.IdEstadoOrden).HasColumnName("id_estado_orden");
-            entity.Property(e => e.MotivoIngreso).HasColumnName("motivo_ingreso").HasMaxLength(500).IsUnicode(false).IsRequired();
+            entity.Property(e => e.MotivoIngreso).HasColumnName("motivo_ingreso").HasMaxLength(500).IsUnicode(false).UseCollation(collationSinTildes).IsRequired();
             entity.Property(e => e.DiagnosticoInicial).HasColumnName("diagnosticoinicial").HasMaxLength(1000).IsUnicode(false).IsRequired();
             entity.Property(e => e.Observaciones).HasColumnName("observaciones").HasMaxLength(1000).IsUnicode(false);
             entity.Property(e => e.FechaIngreso).HasColumnName("fecha_ingreso").HasColumnType("date").IsRequired();
@@ -263,7 +263,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- AvanceTrabajo ----------
         modelBuilder.Entity<AvanceTrabajo>(entity =>
         {
             entity.ToTable("AvanceTrabajo", tb => tb.HasCheckConstraint(
@@ -282,7 +282,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- Presupuesto ----------
         modelBuilder.Entity<Presupuesto>(entity =>
         {
             entity.ToTable("Presupuesto");
@@ -306,8 +306,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-
-        
+        // ---------- DetallePresupuesto ----------
         modelBuilder.Entity<DetallePresupuesto>(entity =>
         {
             entity.ToTable("DetallePresupuesto", tb => tb.HasCheckConstraint(
@@ -334,7 +333,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-
+        // ---------- Factura ----------
         modelBuilder.Entity<Factura>(entity =>
         {
             entity.ToTable("Factura");
@@ -361,14 +360,17 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- DetalleFactura ----------
         modelBuilder.Entity<DetalleFactura>(entity =>
         {
-            entity.ToTable("DetalleFactura");
+            entity.ToTable("DetalleFactura", tb => tb.HasCheckConstraint(
+                "CK_DetalleFactura_TipoItem",
+                "[tipo_item] IN ('Repuesto', 'Mano de obra')"));
             entity.HasKey(e => e.IdDetalleFactura);
             entity.Property(e => e.IdDetalleFactura).HasColumnName("id_detallefactura");
             entity.Property(e => e.IdFactura).HasColumnName("id_factura");
             entity.Property(e => e.IdRepuesto).HasColumnName("id_repuesto");
+            entity.Property(e => e.TipoItem).HasColumnName("tipo_item").HasMaxLength(20).IsUnicode(false).IsRequired();
             entity.Property(e => e.Descripcion).HasColumnName("descripcion").HasMaxLength(300).IsUnicode(false);
             entity.Property(e => e.Cantidad).HasColumnName("cantidad");
             entity.Property(e => e.PrecioUnitario).HasColumnName("precio_unitario").HasPrecision(18, 2);
@@ -385,7 +387,7 @@ public class PsmDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        
+        // ---------- Pago ----------
         modelBuilder.Entity<Pago>(entity =>
         {
             entity.ToTable("Pago");

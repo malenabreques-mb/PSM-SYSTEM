@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PSMSystem.Data;
 
@@ -11,9 +12,11 @@ using PSMSystem.Data;
 namespace PSMSystem.Migrations
 {
     [DbContext(typeof(PsmDbContext))]
-    partial class PsmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260914214955_PrepararFacturacion")]
+    partial class PrepararFacturacion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,15 +84,13 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("apellido")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("apellido");
 
                     b.Property<string>("Direccion")
                         .HasMaxLength(200)
                         .IsUnicode(false)
                         .HasColumnType("varchar(200)")
-                        .HasColumnName("direccion")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("direccion");
 
                     b.Property<DateOnly?>("FechaCreacion")
                         .HasColumnType("date")
@@ -104,8 +105,7 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("nombre")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("nombre");
 
                     b.Property<string>("Telefono")
                         .HasMaxLength(30)
@@ -557,8 +557,7 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(500)
                         .IsUnicode(false)
                         .HasColumnType("varchar(500)")
-                        .HasColumnName("motivo_ingreso")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("motivo_ingreso");
 
                     b.Property<string>("Observaciones")
                         .HasMaxLength(1000)
@@ -678,8 +677,7 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("categoria")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("categoria");
 
                     b.Property<DateOnly?>("FechaCreacion")
                         .HasColumnType("date")
@@ -690,8 +688,7 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(150)
                         .IsUnicode(false)
                         .HasColumnType("varchar(150)")
-                        .HasColumnName("nombre")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("nombre");
 
                     b.Property<decimal?>("PrecioUnitario")
                         .HasPrecision(18, 2)
@@ -702,8 +699,7 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(150)
                         .IsUnicode(false)
                         .HasColumnType("varchar(150)")
-                        .HasColumnName("proveedor")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("proveedor");
 
                     b.Property<int>("StockActual")
                         .HasColumnType("int")
@@ -802,8 +798,7 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(300)
                         .IsUnicode(false)
                         .HasColumnType("varchar(300)")
-                        .HasColumnName("motivo")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("motivo");
 
                     b.HasKey("IdTurno");
 
@@ -850,16 +845,14 @@ namespace PSMSystem.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("marca")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("marca");
 
                     b.Property<string>("Modelo")
                         .IsRequired()
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("modelo")
-                        .UseCollation("Latin1_General_CI_AI");
+                        .HasColumnName("modelo");
 
                     b.Property<string>("Patente")
                         .IsRequired()
