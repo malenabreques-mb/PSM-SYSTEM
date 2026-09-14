@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using PSMSystem.Commands;
 using PSMSystem.Helpers;
@@ -12,6 +13,7 @@ public class PresupuestoOrdenViewModel : ViewModelBase
 {
     private readonly PresupuestoService _presupuestoService;
     private readonly RepuestoService _repuestoService;
+    private readonly FacturaService _facturaService;
     private readonly int _idOrdenTrabajo;
 
     private Presupuesto? _presupuesto;
@@ -24,10 +26,12 @@ public class PresupuestoOrdenViewModel : ViewModelBase
     private bool _huboCambios;
 
     public PresupuestoOrdenViewModel(
-        PresupuestoService presupuestoService, RepuestoService repuestoService, OrdenTrabajo orden)
+        PresupuestoService presupuestoService, RepuestoService repuestoService,
+        FacturaService facturaService, OrdenTrabajo orden)
     {
         _presupuestoService = presupuestoService;
         _repuestoService = repuestoService;
+        _facturaService = facturaService;
         _idOrdenTrabajo = orden.IdOrdenTrabajo;
 
         Orden = orden;
@@ -43,6 +47,7 @@ public class PresupuestoOrdenViewModel : ViewModelBase
         AprobarCommand = new AsyncRelayCommand(async _ => await CambiarEstadoAsync("Aprobado"));
         RechazarCommand = new AsyncRelayCommand(async _ => await CambiarEstadoAsync("Rechazado"));
         VolverAElaboracionCommand = new AsyncRelayCommand(async _ => await CambiarEstadoAsync("En elaboración"));
+        ConvertirEnFacturaCommand = new AsyncRelayCommand(async _ => await ConvertirEnFacturaAsync());
         CerrarCommand = new RelayCommand(_ => SolicitudCierre?.Invoke(this, _huboCambios));
 
         _ = InicializarAsync();
@@ -58,6 +63,8 @@ public class PresupuestoOrdenViewModel : ViewModelBase
     public decimal Total => _presupuesto?.Total ?? 0;
     public string EstadoActual => _presupuesto?.EstadoPresupuesto?.Nombre ?? "";
     public bool EstaEnElaboracion => EstadoActual == "En elaboración";
+    public bool EstaAprobado => EstadoActual == "Aprobado";
+    public bool PuedeVolverAElaboracion => EstaAprobado || EstadoActual == "Rechazado";
     public bool PuedeEditarItems => EstaEnElaboracion;
 
     public string TipoItemSeleccionado
@@ -102,6 +109,7 @@ public class PresupuestoOrdenViewModel : ViewModelBase
     public ICommand AprobarCommand { get; }
     public ICommand RechazarCommand { get; }
     public ICommand VolverAElaboracionCommand { get; }
+    public ICommand ConvertirEnFacturaCommand { get; }
     public ICommand CerrarCommand { get; }
 
     public event EventHandler<bool>? SolicitudCierre;
@@ -136,6 +144,8 @@ public class PresupuestoOrdenViewModel : ViewModelBase
         OnPropertyChanged(nameof(Total));
         OnPropertyChanged(nameof(EstadoActual));
         OnPropertyChanged(nameof(EstaEnElaboracion));
+        OnPropertyChanged(nameof(EstaAprobado));
+        OnPropertyChanged(nameof(PuedeVolverAElaboracion));
         OnPropertyChanged(nameof(PuedeEditarItems));
     }
 
@@ -245,6 +255,29 @@ public class PresupuestoOrdenViewModel : ViewModelBase
         catch (Exception)
         {
             MensajeError = "No se pudo cambiar el estado. Verifique que SQL Server esté iniciado e intente de nuevo.";
+        }
+    }
+
+    private async Task ConvertirEnFacturaAsync()
+    {
+        if (_presupuesto is null) return;
+
+        try
+        {
+            await _facturaService.ConvertirPresupuestoAsync(_presupuesto.IdPresupuesto);
+            _huboCambios = true;
+            await CargarPresupuestoAsync();
+            MessageBox.Show(
+                "Factura generada correctamente. Podés verla y emitirla desde el módulo Facturación.",
+                "PSM System", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (ReglaNegocioException ex)
+        {
+            MensajeError = ex.Message;
+        }
+        catch (Exception)
+        {
+            MensajeError = "No se pudo convertir en factura. Verifique que SQL Server esté iniciado e intente de nuevo.";
         }
     }
 }

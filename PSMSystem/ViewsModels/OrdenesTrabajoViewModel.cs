@@ -19,6 +19,7 @@ public class OrdenesTrabajoViewModel : ViewModelBase
     private readonly AvanceTrabajoService _avanceService;
     private readonly PresupuestoService _presupuestoService;
     private readonly RepuestoService _repuestoService;
+    private readonly FacturaService _facturaService;
 
     private string? _textoBusqueda;
     private EstadoOrdenTrabajo? _estadoFiltro;
@@ -29,7 +30,7 @@ public class OrdenesTrabajoViewModel : ViewModelBase
 
     public OrdenesTrabajoViewModel(
         OrdenTrabajoService ordenService, ClienteService clienteService,
-        VehiculoService vehiculoService, TurnoService turnoService, AvanceTrabajoService avanceService, PresupuestoService presupuestoService, RepuestoService repuestoService)
+        VehiculoService vehiculoService, TurnoService turnoService, AvanceTrabajoService avanceService, PresupuestoService presupuestoService, RepuestoService repuestoService, FacturaService facturaService)
     {
         _ordenService = ordenService;
         _clienteService = clienteService;
@@ -38,6 +39,7 @@ public class OrdenesTrabajoViewModel : ViewModelBase
         _avanceService = avanceService;
         _presupuestoService = presupuestoService;
         _repuestoService = repuestoService;
+        _facturaService = facturaService;
 
         Ordenes = new ObservableCollection<OrdenTrabajo>();
         EstadosFiltro = new ObservableCollection<EstadoOrdenTrabajo>
@@ -168,12 +170,13 @@ public class OrdenesTrabajoViewModel : ViewModelBase
 
         var dialogo = new PresupuestoOrdenView
         {
-            DataContext = new PresupuestoOrdenViewModel(_presupuestoService, _repuestoService, orden),
+            DataContext = new PresupuestoOrdenViewModel(_presupuestoService, _repuestoService, _facturaService, orden),
             Owner = Application.Current.MainWindow
         };
 
         dialogo.ShowDialog();
     }
+
     private async Task EliminarAsync(OrdenTrabajo? orden)
     {
         if (orden is null) return;

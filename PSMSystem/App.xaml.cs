@@ -44,6 +44,8 @@ public partial class App : Application
         services.AddTransient<HistorialViewModel>();
         services.AddTransient<RepuestosViewModel>();
         services.AddSingleton<PresupuestoService>();
+        services.AddSingleton<FacturaService>();
+        services.AddTransient<FacturasViewModel>();
 
         Services = services.BuildServiceProvider();
 

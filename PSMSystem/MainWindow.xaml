@@ -3,15 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="PSM Electrónica y Mecánica Automotriz" Height="600" Width="1000"
         WindowStartupLocation="CenterScreen">
-    <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Clientes" Click="MostrarClientes_Click"/>
-            <MenuItem Header="Vehículos" Click="MostrarVehiculos_Click"/>
-            <MenuItem Header="Turnos" Click="MostrarTurnos_Click"/>
-            <MenuItem Header="Órdenes de Trabajo" Click="MostrarOrdenes_Click"/>
-            <MenuItem Header="Historial" Click="MostrarHistorial_Click"/>
-            <MenuItem Header="Repuestos" Click="MostrarRepuestos_Click"/>
-        </Menu>
-        <ContentControl x:Name="ContenidoPrincipal"/>
-    </DockPanel>
+	<DockPanel>
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="Clientes" Click="MostrarClientes_Click"/>
+			<MenuItem Header="Vehículos" Click="MostrarVehiculos_Click"/>
+			<MenuItem Header="Turnos" Click="MostrarTurnos_Click"/>
+			<MenuItem Header="Órdenes de Trabajo" Click="MostrarOrdenes_Click"/>
+			<MenuItem Header="Historial" Click="MostrarHistorial_Click"/>
+			<MenuItem Header="Repuestos" Click="MostrarRepuestos_Click"/>
+			<MenuItem Header="Facturación" Click="MostrarFacturas_Click"/>
+		</Menu>
+		<ContentControl x:Name="ContenidoPrincipal"/>
+	</DockPanel>
 </Window>

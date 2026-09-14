@@ -1,0 +1,95 @@
+<Window x:Class="PSMSystem.Views.FacturaDetalleView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Detalle de factura"
+        Width="520" Height="680"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock FontSize="16" FontWeight="Bold">
+                <Run Text="Factura "/><Run Text="{Binding NumeroFactura, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Text="{Binding ClienteYVehiculo}" Foreground="Gray"/>
+            <TextBlock Text="{Binding EstadoActual}" FontWeight="Bold" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Detalles}" AutoGenerateColumns="False"
+                  IsReadOnly="True" CanUserAddRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tipo" Binding="{Binding TipoItem}" Width="90"/>
+                <DataGridTextColumn Header="Ítem" Binding="{Binding ItemDescripcion}" Width="*"/>
+                <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="50"/>
+                <DataGridTextColumn Header="Precio" Binding="{Binding PrecioUnitario, StringFormat={}{0:C2}}" Width="90"/>
+                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat={}{0:C2}}" Width="90"/>
+                <DataGridTemplateColumn Header="" Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Quitar" Padding="4,2"
+                                    IsEnabled="{Binding DataContext.PendienteDeEmision, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Command="{Binding DataContext.EliminarItemCommand,
+                                              RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0" Visibility="{Binding PendienteDeEmision, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock Text="Agregar ítem" FontWeight="Bold" Margin="0,0,0,6"/>
+
+            <TextBlock Text="Tipo"/>
+            <ComboBox ItemsSource="{Binding TiposItem}" SelectedItem="{Binding TipoItemSeleccionado}" Margin="0,2,0,10"/>
+
+            <StackPanel Visibility="{Binding EsRepuesto, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="Repuesto"/>
+                <ComboBox ItemsSource="{Binding RepuestosDisponibles}" DisplayMemberPath="DescripcionCombo"
+                          SelectedValuePath="IdRepuesto" SelectedValue="{Binding IdRepuestoSeleccionado}"
+                          Margin="0,2,0,10"/>
+            </StackPanel>
+
+            <StackPanel Visibility="{Binding EsRepuesto, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <TextBlock Text="Descripción del trabajo"/>
+                <TextBox Text="{Binding DescripcionItem, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+            </StackPanel>
+
+            <TextBlock Text="Cantidad"/>
+            <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+            <TextBlock Text="Precio unitario"/>
+            <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+            <Button Content="+ Agregar ítem" Command="{Binding AgregarItemCommand}"
+                    HorizontalAlignment="Left" Padding="10,4"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Text="{Binding MensajeError}" Foreground="Red" TextWrapping="Wrap" Margin="0,8,0,0"/>
+
+        <Grid Grid.Row="4" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock><Run Text="Subtotal: "/><Run Text="{Binding Subtotal, StringFormat={}{0:C2}, Mode=OneWay}"/></TextBlock>
+                <TextBlock><Run Text="IVA (21%): "/><Run Text="{Binding Iva, StringFormat={}{0:C2}, Mode=OneWay}"/></TextBlock>
+                <TextBlock FontWeight="Bold" FontSize="14"><Run Text="Total: "/><Run Text="{Binding Total, StringFormat={}{0:C2}, Mode=OneWay}"/></TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                <Button Content="Emitir Factura" Command="{Binding EmitirCommand}" Padding="10,4" Margin="0,0,8,0"
+                        Visibility="{Binding PendienteDeEmision, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <Button Content="Cerrar" Command="{Binding CerrarCommand}" Width="90"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

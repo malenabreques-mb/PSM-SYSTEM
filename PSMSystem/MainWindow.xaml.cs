@@ -19,6 +19,7 @@ namespace PSMSystem
         private void MostrarOrdenes_Click(object sender, RoutedEventArgs e) => MostrarOrdenes();
         private void MostrarHistorial_Click(object sender, RoutedEventArgs e) => MostrarHistorial();
         private void MostrarRepuestos_Click(object sender, RoutedEventArgs e) => MostrarRepuestos();
+        private void MostrarFacturas_Click(object sender, RoutedEventArgs e) => MostrarFacturas();
 
         private void MostrarClientes()
         {
@@ -65,6 +66,14 @@ namespace PSMSystem
             ContenidoPrincipal.Content = new RepuestosView
             {
                 DataContext = App.Services.GetRequiredService<RepuestosViewModel>()
+            };
+        }
+
+        private void MostrarFacturas()
+        {
+            ContenidoPrincipal.Content = new FacturasView
+            {
+                DataContext = App.Services.GetRequiredService<FacturasViewModel>()
             };
         }
     }
