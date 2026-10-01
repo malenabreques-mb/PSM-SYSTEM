@@ -122,7 +122,6 @@ public class FacturaService
         context.Facturas.Add(factura);
         await context.SaveChangesAsync(ct);
 
-       
         factura.NumeroFactura = $"F-{DateTime.Now:yyyy}-{factura.IdFactura:D6}";
 
         var subtotal = factura.Detalles.Sum(d => d.Subtotal ?? 0);
@@ -190,6 +189,31 @@ public class FacturaService
         await RecalcularTotalesAsync(context, detalle.IdFactura, ct);
     }
 
+    public async Task ActualizarCantidadDetalleAsync(int idDetalle, int nuevaCantidad, CancellationToken ct = default)
+    {
+        if (nuevaCantidad <= 0)
+            throw new ReglaNegocioException("Verifique los datos ingresados: la cantidad tiene que ser mayor a cero.");
+
+        await using var context = await _contextFactory.CreateDbContextAsync(ct);
+
+        var detalle = await context.DetallesFactura.FirstOrDefaultAsync(d => d.IdDetalleFactura == idDetalle, ct)
+            ?? throw new ReglaNegocioException("El ítem ya no existe.");
+
+        var factura = await context.Facturas.Include(f => f.EstadoFactura)
+            .FirstOrDefaultAsync(f => f.IdFactura == detalle.IdFactura, ct)
+            ?? throw new ReglaNegocioException("La factura ya no existe.");
+
+        if (factura.EstadoFactura?.Nombre != "Pendiente de emisión")
+            throw new ReglaNegocioException("Solo se puede editar una factura pendiente de emisión.");
+
+        detalle.Cantidad = nuevaCantidad;
+        detalle.Subtotal = nuevaCantidad * (detalle.PrecioUnitario ?? 0);
+
+        await context.SaveChangesAsync(ct);
+
+        await RecalcularTotalesAsync(context, detalle.IdFactura, ct);
+    }
+
     public async Task EmitirAsync(int idFactura, CancellationToken ct = default)
     {
         await using var context = await _contextFactory.CreateDbContextAsync(ct);
@@ -248,5 +272,18 @@ public class FacturaService
         {
             throw new ReglaNegocioException("Tipo de ítem inválido.");
         }
+    }
+
+    public async Task<List<Factura>> ObtenerPendientesDePagoAsync(CancellationToken ct = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(ct);
+        return await context.Facturas.AsNoTracking()
+            .Include(f => f.EstadoFactura)
+            .Include(f => f.Pagos)
+            .Include(f => f.Presupuesto!.OrdenTrabajo!.Cliente)
+            .Include(f => f.Presupuesto!.OrdenTrabajo!.Vehiculo)
+            .Where(f => f.EstadoFactura!.Nombre == "Pendiente de pago")
+            .OrderBy(f => f.FechaEmision)
+            .ToListAsync(ct);
     }
 }

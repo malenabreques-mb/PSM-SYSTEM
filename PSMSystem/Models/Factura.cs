@@ -12,6 +12,7 @@ public class Factura
     public decimal? Iva { get; set; }
     public decimal? Total { get; set; }
     public DateOnly? FechaEmision { get; set; }
+    public decimal SaldoPendiente => (Total ?? 0) - Pagos.Sum(p => p.Monto);
 
     public Presupuesto? Presupuesto { get; set; }
     public EstadoFactura? EstadoFactura { get; set; }

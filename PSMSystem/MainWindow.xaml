@@ -12,6 +12,7 @@
 			<MenuItem Header="Historial" Click="MostrarHistorial_Click"/>
 			<MenuItem Header="Repuestos" Click="MostrarRepuestos_Click"/>
 			<MenuItem Header="Facturación" Click="MostrarFacturas_Click"/>
+			<MenuItem Header="Saldos Pendientes" Click="MostrarSaldos_Click"/>
 		</Menu>
 		<ContentControl x:Name="ContenidoPrincipal"/>
 	</DockPanel>

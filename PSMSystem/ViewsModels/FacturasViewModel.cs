@@ -14,6 +14,7 @@ public class FacturasViewModel : ViewModelBase
 
     private readonly FacturaService _facturaService;
     private readonly RepuestoService _repuestoService;
+    private readonly PagoService _pagoService;
 
     private string? _textoBusqueda;
     private EstadoFactura? _estadoFiltro;
@@ -22,10 +23,11 @@ public class FacturasViewModel : ViewModelBase
     private int _totalFacturas;
     private bool _cargando;
 
-    public FacturasViewModel(FacturaService facturaService, RepuestoService repuestoService)
+    public FacturasViewModel(FacturaService facturaService, RepuestoService repuestoService, PagoService pagoService)
     {
         _facturaService = facturaService;
         _repuestoService = repuestoService;
+        _pagoService = pagoService;
 
         Facturas = new ObservableCollection<Factura>();
         EstadosFiltro = new ObservableCollection<EstadoFactura>
@@ -124,7 +126,7 @@ public class FacturasViewModel : ViewModelBase
 
         var dialogo = new FacturaDetalleView
         {
-            DataContext = new FacturaDetalleViewModel(_facturaService, _repuestoService, factura.IdFactura),
+            DataContext = new FacturaDetalleViewModel(_facturaService, _repuestoService, _pagoService, factura.IdFactura),
             Owner = Application.Current.MainWindow
         };
 
