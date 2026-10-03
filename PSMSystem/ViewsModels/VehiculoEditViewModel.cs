@@ -1,8 +1,10 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using PSMSystem.Commands;
+using PSMSystem.Helpers;
 using PSMSystem.Models;
 using PSMSystem.Services;
 
@@ -13,11 +15,15 @@ public class VehiculoEditViewModel : ViewModelBase
     private readonly VehiculoService _vehiculoService;
     private readonly int? _idVehiculoExistente;
 
+    private List<Cliente> _todosLosClientes = new();
+
     private string _marca = string.Empty;
     private string _modelo = string.Empty;
     private string _patente = string.Empty;
     private int? _anio;
     private int _idClienteSeleccionado;
+    private string _filtroCliente = string.Empty;
+    private bool _mostrarSugerenciasCliente;
     private string? _mensajeError;
 
     public VehiculoEditViewModel(VehiculoService vehiculoService, ClienteService clienteService, Vehiculo? vehiculoAEditar)
@@ -58,6 +64,25 @@ public class VehiculoEditViewModel : ViewModelBase
         set => SetProperty(ref _idClienteSeleccionado, value);
     }
 
+    public string FiltroCliente
+    {
+        get => _filtroCliente;
+        set
+        {
+            if (SetProperty(ref _filtroCliente, value))
+            {
+                AplicarFiltroClientes();
+                MostrarSugerenciasCliente = !string.IsNullOrWhiteSpace(value);
+            }
+        }
+    }
+
+    public bool MostrarSugerenciasCliente
+    {
+        get => _mostrarSugerenciasCliente;
+        set => SetProperty(ref _mostrarSugerenciasCliente, value);
+    }
+
     public string? MensajeError { get => _mensajeError; set => SetProperty(ref _mensajeError, value); }
 
     public ICommand GuardarCommand { get; }
@@ -69,8 +94,18 @@ public class VehiculoEditViewModel : ViewModelBase
     {
         var clientes = await clienteService.ObtenerClientesActivosAsync();
 
+        _todosLosClientes = clientes;
+        AplicarFiltroClientes();
+    }
+
+    private void AplicarFiltroClientes()
+    {
+        var coincidencias = _todosLosClientes
+            .Where(c => BusquedaHelper.Coincide(c.NombreCompleto, FiltroCliente))
+            .ToList();
+
         ClientesDisponibles.Clear();
-        foreach (var cliente in clientes)
+        foreach (var cliente in coincidencias)
             ClientesDisponibles.Add(cliente);
     }
 

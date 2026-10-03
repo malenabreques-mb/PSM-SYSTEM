@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using PSMSystem.Commands;
+using PSMSystem.Helpers;
 using PSMSystem.Models;
 using PSMSystem.Services;
 
@@ -12,12 +15,19 @@ public class TurnoEditViewModel : ViewModelBase
     private readonly VehiculoService _vehiculoService;
     private readonly int? _idTurnoExistente;
 
+    private List<Cliente> _todosLosClientes = new();
+    private List<Vehiculo> _todosLosVehiculosDelCliente = new();
+
     private DateTime? _fechaSeleccionada = DateTime.Today;
     private string _horaTexto = string.Empty;
     private string _motivo = string.Empty;
     private int _idClienteSeleccionado;
     private int _idVehiculoSeleccionado;
     private int _idEstadoSeleccionado = 1;
+    private string _filtroCliente = string.Empty;
+    private string _filtroVehiculo = string.Empty;
+    private bool _mostrarSugerenciasCliente;
+    private bool _mostrarSugerenciasVehiculo;
     private string? _mensajeError;
 
     public TurnoEditViewModel(
@@ -64,12 +74,45 @@ public class TurnoEditViewModel : ViewModelBase
         set
         {
             if (SetProperty(ref _idClienteSeleccionado, value))
+            {
+                _filtroVehiculo = string.Empty;
+                OnPropertyChanged(nameof(FiltroVehiculo));
                 _ = CargarVehiculosDelClienteAsync();
+            }
         }
     }
 
     public int IdVehiculoSeleccionado { get => _idVehiculoSeleccionado; set => SetProperty(ref _idVehiculoSeleccionado, value); }
     public int IdEstadoSeleccionado { get => _idEstadoSeleccionado; set => SetProperty(ref _idEstadoSeleccionado, value); }
+
+    public string FiltroCliente
+    {
+        get => _filtroCliente;
+        set
+        {
+            if (SetProperty(ref _filtroCliente, value))
+            {
+                AplicarFiltroClientes();
+                MostrarSugerenciasCliente = !string.IsNullOrWhiteSpace(value);
+            }
+        }
+    }
+
+    public string FiltroVehiculo
+    {
+        get => _filtroVehiculo;
+        set
+        {
+            if (SetProperty(ref _filtroVehiculo, value))
+            {
+                AplicarFiltroVehiculos();
+                MostrarSugerenciasVehiculo = !string.IsNullOrWhiteSpace(value);
+            }
+        }
+    }
+
+    public bool MostrarSugerenciasCliente { get => _mostrarSugerenciasCliente; set => SetProperty(ref _mostrarSugerenciasCliente, value); }
+    public bool MostrarSugerenciasVehiculo { get => _mostrarSugerenciasVehiculo; set => SetProperty(ref _mostrarSugerenciasVehiculo, value); }
 
     public string? MensajeError { get => _mensajeError; set => SetProperty(ref _mensajeError, value); }
 
@@ -81,9 +124,8 @@ public class TurnoEditViewModel : ViewModelBase
     private async Task InicializarAsync(ClienteService clienteService)
     {
         var clientes = await clienteService.ObtenerClientesActivosAsync();
-        ClientesDisponibles.Clear();
-        foreach (var cliente in clientes)
-            ClientesDisponibles.Add(cliente);
+        _todosLosClientes = clientes;
+        AplicarFiltroClientes();
 
         var estados = await _turnoService.ObtenerEstadosAsync();
         EstadosDisponibles.Clear();
@@ -94,14 +136,37 @@ public class TurnoEditViewModel : ViewModelBase
             await CargarVehiculosDelClienteAsync();
     }
 
+    private void AplicarFiltroClientes()
+    {
+        var coincidencias = _todosLosClientes
+            .Where(c => BusquedaHelper.Coincide(c.NombreCompleto, FiltroCliente))
+            .ToList();
+
+        ClientesDisponibles.Clear();
+        foreach (var cliente in coincidencias)
+            ClientesDisponibles.Add(cliente);
+    }
+
     private async Task CargarVehiculosDelClienteAsync()
     {
-        VehiculosDisponibles.Clear();
+        _todosLosVehiculosDelCliente = new List<Vehiculo>();
+        AplicarFiltroVehiculos();
 
         if (IdClienteSeleccionado <= 0) return;
 
         var vehiculos = await _vehiculoService.ObtenerVehiculosActivosPorClienteAsync(IdClienteSeleccionado);
-        foreach (var vehiculo in vehiculos)
+        _todosLosVehiculosDelCliente = vehiculos;
+        AplicarFiltroVehiculos();
+    }
+
+    private void AplicarFiltroVehiculos()
+    {
+        var coincidencias = _todosLosVehiculosDelCliente
+            .Where(v => BusquedaHelper.Coincide(v.DescripcionCombo, FiltroVehiculo))
+            .ToList();
+
+        VehiculosDisponibles.Clear();
+        foreach (var vehiculo in coincidencias)
             VehiculosDisponibles.Add(vehiculo);
     }
 
