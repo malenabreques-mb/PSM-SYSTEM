@@ -70,19 +70,45 @@ public class PresupuestoService
 
         await using var context = await _contextFactory.CreateDbContextAsync(ct);
 
-        var presupuestoExiste = await context.Presupuestos.AnyAsync(p => p.IdPresupuesto == detalle.IdPresupuesto, ct);
-        if (!presupuestoExiste)
-            throw new ReglaNegocioException("El presupuesto ya no existe.");
+        var presupuesto = await context.Presupuestos
+            .Include(p => p.EstadoPresupuesto)
+            .FirstOrDefaultAsync(p => p.IdPresupuesto == detalle.IdPresupuesto, ct)
+            ?? throw new ReglaNegocioException("El presupuesto ya no existe.");
+
+        if (presupuesto.EstadoPresupuesto?.Nombre != "En elaboración")
+            throw new ReglaNegocioException("Solo se pueden agregar ítems a un presupuesto en elaboración.");
 
         if (detalle.TipoItem == TiposItemPresupuesto.Repuesto)
         {
-            var repuestoExiste = await context.Repuestos.AnyAsync(r => r.IdRepuesto == detalle.IdRepuesto, ct);
-            if (!repuestoExiste)
-                throw new ReglaNegocioException("Verifique los datos ingresados: el repuesto seleccionado no existe en el inventario.");
+            var repuesto = await context.Repuestos
+                .FirstOrDefaultAsync(r => r.IdRepuesto == detalle.IdRepuesto, ct)
+                ?? throw new ReglaNegocioException(
+                    "Verifique los datos ingresados: el repuesto seleccionado no existe en el inventario.");
+
+            if (repuesto.StockActual < detalle.Cantidad)
+                throw new ReglaNegocioException(
+                    $"Stock insuficiente de {repuesto.Nombre}: hay {repuesto.StockActual} unidades y se necesitan {detalle.Cantidad}.");
+
+            var tipoEgreso = await context.TiposMovimientoStock
+                .FirstOrDefaultAsync(t => t.Nombre == "Egreso", ct)
+                ?? throw new ReglaNegocioException("No se encontró el tipo de movimiento 'Egreso'.");
+
+            repuesto.StockActual -= detalle.Cantidad;
+
+            context.MovimientosStock.Add(new MovimientoStock
+            {
+                IdRepuesto = repuesto.IdRepuesto,
+                IdTipoMovimiento = tipoEgreso.IdTipoMovimiento,
+                Cantidad = detalle.Cantidad,
+                Fecha = DateOnly.FromDateTime(DateTime.Now),
+                Observacion = $"Uso en orden de trabajo #{presupuesto.IdOrdenTrabajo} (presupuesto #{presupuesto.IdPresupuesto})"
+            });
         }
 
         detalle.Subtotal = detalle.Cantidad * detalle.PrecioUnitario;
         context.DetallesPresupuesto.Add(detalle);
+
+        
         await context.SaveChangesAsync(ct);
 
         await RecalcularTotalesAsync(context, detalle.IdPresupuesto, ct);
@@ -98,6 +124,37 @@ public class PresupuestoService
             ?? throw new ReglaNegocioException("El ítem ya no existe.");
 
         var idPresupuesto = detalle.IdPresupuesto;
+
+        var presupuesto = await context.Presupuestos
+            .Include(p => p.EstadoPresupuesto)
+            .FirstOrDefaultAsync(p => p.IdPresupuesto == idPresupuesto, ct)
+            ?? throw new ReglaNegocioException("El presupuesto ya no existe.");
+
+        if (presupuesto.EstadoPresupuesto?.Nombre != "En elaboración")
+            throw new ReglaNegocioException("Solo se pueden quitar ítems de un presupuesto en elaboración.");
+
+        if (detalle.TipoItem == TiposItemPresupuesto.Repuesto && detalle.IdRepuesto.HasValue)
+        {
+            var repuesto = await context.Repuestos
+                .FirstOrDefaultAsync(r => r.IdRepuesto == detalle.IdRepuesto.Value, ct);
+
+            var tipoIngreso = await context.TiposMovimientoStock
+                .FirstOrDefaultAsync(t => t.Nombre == "Ingreso", ct);
+
+            if (repuesto is not null && tipoIngreso is not null)
+            {
+                repuesto.StockActual += detalle.Cantidad;
+
+                context.MovimientosStock.Add(new MovimientoStock
+                {
+                    IdRepuesto = repuesto.IdRepuesto,
+                    IdTipoMovimiento = tipoIngreso.IdTipoMovimiento,
+                    Cantidad = detalle.Cantidad,
+                    Fecha = DateOnly.FromDateTime(DateTime.Now),
+                    Observacion = $"Reintegro por ítem quitado del presupuesto #{idPresupuesto}"
+                });
+            }
+        }
 
         context.DetallesPresupuesto.Remove(detalle);
         await context.SaveChangesAsync(ct);
