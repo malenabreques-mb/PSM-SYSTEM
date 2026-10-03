@@ -109,14 +109,14 @@ public class RepuestoService
         if (string.IsNullOrWhiteSpace(repuesto.Nombre))
             throw new ReglaNegocioException("El nombre del repuesto es obligatorio.");
 
+        if (!repuesto.PrecioUnitario.HasValue || repuesto.PrecioUnitario.Value <= 0)
+            throw new ReglaNegocioException("El precio unitario es obligatorio y tiene que ser mayor a cero.");
+
         if (repuesto.StockActual < 0)
             throw new ReglaNegocioException("El stock no puede ser negativo.");
 
         if (repuesto.StockMinimo.HasValue && repuesto.StockMinimo.Value < 0)
             throw new ReglaNegocioException("El stock mínimo no puede ser negativo.");
-
-        if (repuesto.PrecioUnitario.HasValue && repuesto.PrecioUnitario.Value < 0)
-            throw new ReglaNegocioException("El precio no puede ser negativo.");
     }
 
     public async Task<List<Repuesto>> ObtenerActivosAsync(CancellationToken ct = default)

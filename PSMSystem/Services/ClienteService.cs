@@ -132,15 +132,34 @@ public class ClienteService
         if (string.IsNullOrWhiteSpace(cliente.Nombre))
             throw new ReglaNegocioException("El nombre es obligatorio.");
 
+        if (!EsSoloLetras(cliente.Nombre))
+            throw new ReglaNegocioException("El nombre solo puede contener letras.");
+
         if (string.IsNullOrWhiteSpace(cliente.Apellido))
             throw new ReglaNegocioException("El apellido es obligatorio.");
+
+        if (!EsSoloLetras(cliente.Apellido))
+            throw new ReglaNegocioException("El apellido solo puede contener letras.");
 
         if (string.IsNullOrWhiteSpace(cliente.Telefono))
             throw new ReglaNegocioException("El teléfono es obligatorio.");
 
+        var soloDigitos = new string(cliente.Telefono.Where(char.IsDigit).ToArray());
+        if (soloDigitos.Length < 6 || soloDigitos.Length > 15)
+            throw new ReglaNegocioException("El teléfono tiene que tener entre 6 y 15 dígitos.");
+
+        if (cliente.Telefono.Any(c => !char.IsDigit(c) && c != ' ' && c != '-' && c != '(' && c != ')' && c != '+'))
+            throw new ReglaNegocioException("El teléfono contiene caracteres inválidos.");
+
         if (string.IsNullOrWhiteSpace(cliente.Direccion))
             throw new ReglaNegocioException("La dirección es obligatoria.");
+
+        if (!cliente.Direccion.Any(char.IsLetter))
+            throw new ReglaNegocioException("La dirección tiene que incluir el nombre de la calle, no solo números.");
     }
+
+    private static bool EsSoloLetras(string valor) =>
+        valor.All(c => char.IsLetter(c) || c == ' ' || c == '\'' || c == '-');
 
     public async Task<List<Cliente>> ObtenerClientesActivosAsync(CancellationToken ct = default)
     {
