@@ -157,7 +157,7 @@ public class OrdenesTrabajoViewModel : ViewModelBase
 
         var dialogo = new AvancesOrdenView
         {
-            DataContext = new AvancesOrdenViewModel(_avanceService, orden),
+            DataContext = new AvancesOrdenViewModel(_avanceService, _ordenService, orden),
             Owner = Application.Current.MainWindow
         };
 

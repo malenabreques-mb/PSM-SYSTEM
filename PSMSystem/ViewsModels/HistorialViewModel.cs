@@ -98,7 +98,7 @@ public class HistorialViewModel : ViewModelBase
 
         var dialogo = new AvancesOrdenView
         {
-            DataContext = new AvancesOrdenViewModel(_avanceService, orden, soloLectura: true),
+            DataContext = new AvancesOrdenViewModel(_avanceService, _ordenService, orden, soloLectura: true),
             Owner = Application.Current.MainWindow
         };
 

@@ -10,36 +10,44 @@ namespace PSMSystem.ViewsModels;
 public class AvancesOrdenViewModel : ViewModelBase
 {
     private readonly AvanceTrabajoService _avanceService;
+    private readonly OrdenTrabajoService _ordenTrabajoService;
     private readonly int _idOrdenTrabajo;
 
     private string _etapaSeleccionada;
     private string _descripcion = string.Empty;
     private DateTime? _fecha = DateTime.Today;
     private string? _mensajeError;
+    private int _idEstadoSeleccionado;
 
-    public AvancesOrdenViewModel(AvanceTrabajoService avanceService, OrdenTrabajo orden, bool soloLectura = false)
+    public AvancesOrdenViewModel(
+        AvanceTrabajoService avanceService, OrdenTrabajoService ordenTrabajoService, OrdenTrabajo orden, bool soloLectura = false)
     {
         _avanceService = avanceService;
+        _ordenTrabajoService = ordenTrabajoService;
         _idOrdenTrabajo = orden.IdOrdenTrabajo;
 
         Orden = orden;
         SoloLectura = soloLectura;
         Avances = new ObservableCollection<AvanceTrabajo>();
+        EstadosOrden = new ObservableCollection<EstadoOrdenTrabajo>();
         Etapas = EtapasAvanceTrabajo.Todas;
         _etapaSeleccionada = Etapas[0];
+        _idEstadoSeleccionado = orden.IdEstadoOrden;
 
         AgregarAvanceCommand = new AsyncRelayCommand(async _ => await AgregarAvanceAsync());
         CerrarCommand = new RelayCommand(_ => SolicitudCierre?.Invoke(this, EventArgs.Empty));
 
-        _ = CargarAvancesAsync();
+        _ = InicializarAsync();
     }
 
     public OrdenTrabajo Orden { get; }
     public bool SoloLectura { get; }
     public bool MuestraFormularioAlta => !SoloLectura;
+    public bool MuestraCambioEstado => !SoloLectura;
     public string Titulo => SoloLectura ? "Detalle de la reparación" : "Avances de la orden";
 
     public ObservableCollection<AvanceTrabajo> Avances { get; }
+    public ObservableCollection<EstadoOrdenTrabajo> EstadosOrden { get; }
     public IReadOnlyList<string> Etapas { get; }
 
     public string EtapaSeleccionada { get => _etapaSeleccionada; set => SetProperty(ref _etapaSeleccionada, value); }
@@ -47,10 +55,30 @@ public class AvancesOrdenViewModel : ViewModelBase
     public DateTime? Fecha { get => _fecha; set => SetProperty(ref _fecha, value); }
     public string? MensajeError { get => _mensajeError; set => SetProperty(ref _mensajeError, value); }
 
+    public int IdEstadoSeleccionado
+    {
+        get => _idEstadoSeleccionado;
+        set
+        {
+            if (SetProperty(ref _idEstadoSeleccionado, value))
+                _ = CambiarEstadoAsync(value);
+        }
+    }
+
     public ICommand AgregarAvanceCommand { get; }
     public ICommand CerrarCommand { get; }
 
     public event EventHandler? SolicitudCierre;
+
+    private async Task InicializarAsync()
+    {
+        var estados = await _ordenTrabajoService.ObtenerEstadosAsync();
+        EstadosOrden.Clear();
+        foreach (var estado in estados)
+            EstadosOrden.Add(estado);
+
+        await CargarAvancesAsync();
+    }
 
     private async Task CargarAvancesAsync()
     {
@@ -91,6 +119,33 @@ public class AvancesOrdenViewModel : ViewModelBase
         catch (Exception)
         {
             MensajeError = "No se pudo guardar. Verifique que SQL Server esté iniciado e intente de nuevo.";
+        }
+    }
+
+    private async Task CambiarEstadoAsync(int idEstadoNuevo)
+    {
+        MensajeError = null;
+
+        var estadoAnterior = Orden.IdEstadoOrden;
+        Orden.IdEstadoOrden = idEstadoNuevo;
+
+        try
+        {
+            await _ordenTrabajoService.ActualizarAsync(Orden);
+        }
+        catch (ReglaNegocioException ex)
+        {
+            Orden.IdEstadoOrden = estadoAnterior;
+            _idEstadoSeleccionado = estadoAnterior;
+            OnPropertyChanged(nameof(IdEstadoSeleccionado));
+            MensajeError = ex.Message;
+        }
+        catch (Exception)
+        {
+            Orden.IdEstadoOrden = estadoAnterior;
+            _idEstadoSeleccionado = estadoAnterior;
+            OnPropertyChanged(nameof(IdEstadoSeleccionado));
+            MensajeError = "No se pudo actualizar el estado. Verifique que SQL Server esté iniciado e intente de nuevo.";
         }
     }
 }
